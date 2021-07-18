@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Modules Backup Modifications</name>
+    <code>extension_setting_backup</code>
+    <version>1.0</version>
+    <author>Glove</author>
+    <link>http://www.opencart.com</link>
+    <file path="admin/controller/extension/*/*.php">
+        <operation>
+            <search>
+                <![CDATA[$this->model_setting_module->addModule]]>
+            </search>
+            <add position="after">
+                <![CDATA[
+                    $this->load->model('extension/module/extension_setting_backup');
+                    $this->model_extension_module_extension_setting_backup->save(__FILE__, $this->request->post, $this->db->getLastId());
+                ]]>
+            </add>
+        </operation>
+        <operation>
+            <search>
+                <![CDATA[$this->model_setting_module->editModule($this->request->get['module_id'], $this->request->post);]]>
+            </search>
+            <add position="after">
+                <![CDATA[
+                    $this->load->model('extension/module/extension_setting_backup');
+                    $this->model_extension_module_extension_setting_backup->save(__FILE__, $this->request->post, $this->request->get['module_id']);
+                ]]>
+            </add>
+        </operation>
+    </file>
+    <file path="admin/controller/extension/*/*.php">
+        <operation>
+            <search>
+                <![CDATA[$this->model_setting_setting->editSetting]]>
+            </search>
+            <add position="after">
+                <![CDATA[
+                    $this->load->model('extension/module/extension_setting_backup');
+                    $this->model_extension_module_extension_setting_backup->save(__FILE__, $this->request->post, 0);
+                ]]>
+            </add>
+        </operation>
+    </file>
+</modification>

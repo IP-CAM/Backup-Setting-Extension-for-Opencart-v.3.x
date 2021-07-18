@@ -1,0 +1,168 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+            <h1>{{ heading_title }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if error_warning %}
+            <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        {% if success %}
+            <div class="alert alert-success alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ success }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+            </div>
+            <div class="panel-body">
+                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                        <div class="col-sm-10">
+                            <select name="module_extension_setting_backup_status" id="input-status" class="form-control">
+                                {% if module_extension_setting_backup_status %}
+                                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                                    <option value="0">{{ text_disabled }}</option>
+                                {% else %}
+                                    <option value="1">{{ text_enabled }}</option>
+                                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-clean-interval">{{ entry_clean_interval }}</label>
+                        <div class="col-sm-10">
+                            <input type="number" min="0" value="{{ module_extension_setting_backup_clean_interval }}" name="module_extension_setting_backup_clean_interval" id="input-clean-interval" class="form-control">
+                        </div>
+                    </div>
+                </form>
+
+                <div id="backup-result">
+
+                </div>
+                {% if backups %}
+                <ul class="nav nav-tabs">
+                    {% for type, typeData in backups %}
+                    <li><a href="#tab-{{ type }}" data-toggle="tab">{{ typeData.name }}</a></li>
+                    {% endfor %}
+                </ul>
+                <div class="tab-content">
+                    {% for type, typeData in backups %}
+                    <div class="tab-pane" id="tab-{{ type }}">
+                        <ul class="nav nav-tabs">
+                        {% for extension, extensionData in typeData.extensions %}
+                            <li><a href="#tab-{{ type }}-{{ extension }}" data-toggle="tab">{{ extensionData.name }}</a></li>
+                        {% endfor %}
+                        </ul>
+                        <div class="tab-content">
+                            {% for extension, extensionData in typeData.extensions %}
+                            <div class="tab-pane" id="tab-{{ type }}-{{ extension }}">
+                                {% if extensionData.children %}
+                                    <ul class="nav nav-tabs">
+                                        {% for children, childrenData in extensionData.children %}
+                                            <li><a href="#tab-{{ type }}-{{ extension }}-{{ children }}" data-toggle="tab">{{ childrenData.name }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                    <div class="tab-content">
+                                        {% for children, childrenData in extensionData.children %}
+                                        <div class="tab-pane" id="tab-{{ type }}-{{ extension }}-{{ children }}">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped">
+                                                    {% for backup in childrenData.backups %}
+                                                        <tr>
+                                                            <td class="text-left">{{ backup.name }}</td>
+                                                            <td class="text-right">
+                                                                <a href="{{ backup.link }}" class="btn btn-primary">{{ button_restore }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </table>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            {% for backup in extensionData.backups %}
+                                                <tr>
+                                                    <td class="text-left">{{ backup.name }}</td>
+                                                    <td class="text-right">
+                                                        <a href="{{ backup.link }}" class="btn btn-primary">{{ button_restore }}</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <div class="text-center">{{ text_no_results }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #accordionBackups .card {
+        margin-bottom: 5px;
+    }
+    #accordionBackups .card-header {
+        background: #1e91cf;
+        border-radius: 5px;
+    }
+
+    #accordionBackups .card-header .btn-link,
+    #accordionBackups .card-header .btn-link:focus,
+    #accordionBackups .card-header .btn-link:focus-visible{
+        width: 100%;
+        border: none;
+        color: #ffffff;
+        text-transform: capitalize;
+        text-align: left;
+        position: relative;
+    }
+
+    #accordionBackups .card-header .btn-link:after {
+        content: '';
+        position: absolute;
+        right: 10px;
+        top: calc(50% - 3px);
+        border-top: 7px solid #ffffff;
+        border-right: 7px solid transparent;
+        border-left: 7px solid transparent;
+        border-bottom: 7px solid transparent;
+    }
+
+    #accordionBackups .backup {
+        border: 1px solid #dcdcdc;
+        border-radius: 0 0 5px 5px;
+        padding: 5px 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+
+{{ footer }}
